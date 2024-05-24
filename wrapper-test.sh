@@ -6,4 +6,5 @@ cp -v /global/homes/t/tianle/myWork/aid2e/globus_compute/test/test_ALTAS_toy/wor
 echo [$SECONDS] "PANDA JOB ID - "$PANDA_JOB_ID
 
 cd /global/homes/t/tianle/myWork/aid2e/globus_compute/test/test_ALTAS_toy/work/ 
-/bin/bash cpu_bind.sh 
+#/bin/bash cpu_bind.sh 
+check-mpi.gnu.pm
