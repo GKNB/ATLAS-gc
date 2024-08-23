@@ -1,0 +1,57 @@
+engine:
+    type: HighThroughputEngine
+    #worker is not block, but how many task runing in parallel in a single block
+    #match to max number of pilot in a single job concurrently
+    #It is so strange that this is not ntasks_per_node???
+    max_workers_per_node: 4
+    worker_debug: True
+
+    strategy:
+        type: SimpleStrategy
+        max_idletime: 60
+
+    address:
+        type: address_by_interface
+        ifname: hsn0
+
+    provider:
+        type: SlurmProvider
+
+        # We request all hyperthreads on a node.
+        # GPU nodes have 128 threads, CPU nodes have 256 threads
+        #launcher:
+        #    type: SrunLauncher
+        #    overrides: -c 128
+
+        # string to prepend to #SBATCH blocks in the submit
+        # script to the scheduler
+        # For GPUs in the debug qos eg: "#SBATCH --constraint=gpu -q debug"
+        ####temp remove the following line
+        ####scheduler_options: "#SBATCH --constraint=gpu -q debug --gpus=4"
+#        scheduler_options: "#SBATCH -C cpu -q debug"
+
+        scheduler_options: |
+          #SBATCH --constraint=cpu
+          #SBATCH --qos=premium
+          #SBATCH --module=cvmfs
+        # Your NERSC account, eg: "m0000"
+        account: "m2616"
+
+        # Command to be run before starting a worker
+        # e.g., "module load Anaconda; source activate parsl_env"
+        worker_init: |
+          source /global/homes/t/tianle/myWork/aid2e/globus_compute/globus_compute_venv/bin/activate
+          export PANDA_HOME=/global/common/software/m2616/harvester-perlmutter
+
+        # increase the command timeouts
+        cmd_timeout: 120
+
+        # Scale between 0-1 blocks with 1 nodes per block
+        #block mean batch job, this is node per batch job, not per pilot
+        nodes_per_block: 2
+        init_blocks: 0
+        min_blocks: 0
+        max_blocks: 1
+
+        # Hold blocks for 10 minutes
+        walltime: 00:10:00
