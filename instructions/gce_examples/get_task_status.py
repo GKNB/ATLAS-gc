@@ -12,12 +12,6 @@ def get_args():
     parser.add_argument('-t', '--tasks', nargs='+', type=str,
                         help='List of task IDs')
     return parser.parse_args()
-    #
-    #
-    # if args.items:
-    #     print(f"Received items: {args.items}")
-    # else:
-    #     print("No items provided.")
 
 
 def print_result(task_id, batch_result):
