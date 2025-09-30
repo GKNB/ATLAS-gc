@@ -1,0 +1,77 @@
+{% if endpoint_type == '"slurm"' %}
+{% set default_scheduler_options -%}
+#SBATCH --constraint=cpu
+#SBATCH --module=cvmfs
+#SBATCH --qos={{ partition }}
+{%- endset %}
+
+{% set combined_scheduler_options = default_scheduler_options + '\n' + (scheduler_options | default('')) %}
+
+{% set default_worker_init -%}
+{{ gc_setup_cmd }}
+{%- endset %}
+
+{% set combined_worker_init = default_worker_init + '\n' + (worker_init_extra | default('')) %}
+
+endpoint_setup: {{ endpoint_setup|default() }}
+
+engine:
+  type: GlobusComputeEngine
+  worker_debug: True
+  max_retries_on_system_failure: 0
+  max_workers_per_node: 1
+
+  # Disable fetching additional tasks on the worker to prevent
+  # the worker from fetching >1 tasks
+  drain_period: 240
+
+  # Disable task prefetch on the workers. Tasks should queue on the
+  # endpoint until capacity exists
+  prefetch_capacity: 0
+
+  job_status_kwargs:
+    max_idletime: 60
+  address:
+    type: address_by_interface
+    ifname: hsn0
+
+  provider:
+    type: SlurmProvider
+
+    # Parallelism of nodes_per_block forces GC to provision as many workers
+    # as there are tasks.
+    # See https://github.com/Parsl/parsl/issues/1647#issuecomment-1726266380
+    parallelism: {{ parallelism }}
+
+    launcher:
+      type: SimpleLauncher
+    scheduler_options: |
+      {{ combined_scheduler_options | trim('"') | replace("\\n", "\n") | indent(6) | replace('\"', '') }}
+    account: {{ account }}
+    cmd_timeout: 120
+    nodes_per_block: {{ nodes_per_block | default(1) }}
+    min_blocks: 0
+    max_blocks: {{ max_blocks }}
+    init_blocks: 1
+    walltime: {{ walltime }}
+    worker_init: |
+      {{ combined_worker_init | trim('"') | replace("\\n", "\n") | indent(6) | replace('\"', '') }}
+
+idle_heartbeats_soft: 10
+idle_heartbeats_hard: 5760
+log_dir: {{ gc_log_dir }}
+
+{% elif endpoint_type == '"local"' %}
+
+engine:
+  type: GlobusComputeEngine
+  run_in_sandbox: True
+  worker_debug: True
+  max_workers_per_node: {{ max_workers_per_node }}
+  provider:
+    init_blocks: 0
+    max_blocks: 1
+    min_blocks: 0
+    type: LocalProvider
+
+{% endif %}

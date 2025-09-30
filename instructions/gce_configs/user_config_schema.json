@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "endpoint_setup": { "type": "string" },
+    "worker_init": { "type": "string" },
+
+    "endpoint_type": { "type": "string", "enum": ["slurm", "local"] },
+
+    "account": { "type": "string",  "default": "m4402" },
+    "partition": { "type": "string",  "default": "debug" },
+    "parallelism": { "type": "number",  "default": 1.0 },
+    "walltime": { "type": "string",  "default": "02:00:00" },
+    "scheduler_options": { "type": "string",  "default": "" },
+    "nodes_per_block": { "type": "integer", "default": 1 },
+    "worker_init_extra": { "type": "string",  "default": "" },
+    "max_blocks": { "type": "integer", "default": 1 },
+
+    "max_workers_per_node": { "type": "integer", "default": 4 },
+
+    "gc_setup_cmd": {
+        "type": "string",
+        "default": "source /global/homes/u/usatlas/globus-compute/setup_gc.sh"
+    },
+    "gc_log_dir": {
+        "type": "string",
+        "default": "/pscratch/sd/u/usatlas/globus_compute_log/mep_merge_comp_local"
+    }
+  },
+  "additionalProperties": true
+}
